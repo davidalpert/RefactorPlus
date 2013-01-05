@@ -22,7 +22,7 @@ namespace RefactorPlus.Tests
 
         protected override IContextAction CreateContextAction(ICSharpContextActionDataProvider dataProvider)
         {
-            return new RemoveQualifierAction(dataProvider);
+            return new RemoveTypeQualifierContextAction(dataProvider);
         }
 
         [Test]
