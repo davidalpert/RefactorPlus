@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefactorPlus.7.0", "src\RefactorPlus\RefactorPlus\RefactorPlus.7.0.csproj", "{E303E1AD-A63C-4E66-913F-66BAB0CD225F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefactorPlus.7.0", "src\RefactorPlus\RefactorPlus.7.0.csproj", "{E303E1AD-A63C-4E66-913F-66BAB0CD225F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefactorPlus.Tests.7.0", "src\RefactorPlus\RefactorPlus.Tests\RefactorPlus.Tests.7.0.csproj", "{1F0B6D96-BC38-4330-BA1E-D728A13608F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefactorPlus.Tests.7.0", "src\RefactorPlus.Tests\RefactorPlus.Tests.7.0.csproj", "{1F0B6D96-BC38-4330-BA1E-D728A13608F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
