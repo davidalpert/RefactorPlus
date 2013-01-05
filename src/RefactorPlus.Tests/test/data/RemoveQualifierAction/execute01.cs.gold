@@ -1,0 +1,14 @@
+using System.Text.RegularExpressions;
+
+namespace N
+{
+  class C
+  {
+    static void Main(string[] args)
+    {
+      {caret}Regex regex = new System.Text.RegularExpressions.Regex("some pattern");
+
+      string s = "cba{caret}";
+    }
+  }
+}

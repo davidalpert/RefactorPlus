@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace RefactorPlus.Tests
 {
-  [TestFixture]
+    [TestFixture]
   public class ReverseStringAvailabilityTests : CSharpContextActionAvailabilityTestBase
   {
     [Test]

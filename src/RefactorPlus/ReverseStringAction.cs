@@ -13,7 +13,7 @@ using JetBrains.Util;
 
 namespace RefactorPlus
 {
-  /// <summary>
+    /// <summary>
   /// This is an example context action. The test project demonstrates tests for
   /// availability and execution of this action.
   /// </summary>
