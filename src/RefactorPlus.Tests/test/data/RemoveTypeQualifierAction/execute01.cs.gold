@@ -6,9 +6,7 @@ namespace N
   {
     static void Main(string[] args)
     {
-      {caret}Regex regex = new System.Text.RegularExpressions.Regex("some pattern");
-
-      string s = "cba{caret}";
+      var z = new {caret}Regex("a");
     }
   }
 }

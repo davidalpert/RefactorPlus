@@ -7,21 +7,23 @@ using NUnit.Framework;
 namespace RefactorPlus.Tests
 {
     [TestFixture]
-    public class RemoveQualifierAvailabilityTest : CSharpContextActionAvailabilityTestBase
+    public class RemoveTypeQualifierAvailabilityTest : CSharpContextActionAvailabilityTestBase
     {
+        private string actionName = typeof (RemoveTypeQualifierAction).Name;
+
         protected override string ExtraPath
         {
-            get { return "RemoveQualifierAction"; }
+            get { return actionName; }
         }
 
         protected override string RelativeTestDataPath
         {
-            get { return "RemoveQualifierAction"; }
+            get { return actionName; }
         }
 
         protected override IContextAction CreateContextAction(ICSharpContextActionDataProvider dataProvider)
         {
-            return new RemoveTypeQualifierContextAction(dataProvider);
+            return new RemoveTypeQualifierAction(dataProvider);
         }
 
         [TestCase("availability01")]

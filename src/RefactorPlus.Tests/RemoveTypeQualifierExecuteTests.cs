@@ -8,27 +8,32 @@ namespace RefactorPlus.Tests
     using NUnit.Framework;
 
     [TestFixture]
-    public class RemoveQualifierExecuteTests : CSharpContextActionExecuteTestBase
+    public class RemoveTypeQualifierExecuteTests : CSharpContextActionExecuteTestBase
     {
+        private string actionName = typeof(RemoveTypeQualifierAction).Name;
+
         protected override string ExtraPath
         {
-            get { return "RemoveQualifierAction"; }
+            get { return actionName; }
         }
 
         protected override string RelativeTestDataPath
         {
-            get { return "RemoveQualifierAction"; }
+            get { return actionName; }
         }
 
         protected override IContextAction CreateContextAction(ICSharpContextActionDataProvider dataProvider)
         {
-            return new RemoveTypeQualifierContextAction(dataProvider);
+            return new RemoveTypeQualifierAction(dataProvider);
         }
 
+        [TestCase("execute01")]
+        [TestCase("execute02")]
+        [TestCase("execute03")]
         [Test]
-        public void ExecuteTest()
+        public void TestCases(string testSrc)
         {
-            DoTestFiles("execute01.cs");
+            DoOneTest(testSrc);
         }
     }
 }

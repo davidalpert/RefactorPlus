@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using JetBrains.Application;
 using JetBrains.Application.Progress;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Bulbs;
@@ -8,21 +7,20 @@ using JetBrains.ReSharper.Feature.Services.CSharp.Bulbs;
 using JetBrains.ReSharper.Intentions.Extensibility;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
+using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
 using JetBrains.ReSharper.Psi.Tree;
 using JetBrains.TextControl;
 using JetBrains.Util;
 
 namespace RefactorPlus
 {
-    using JetBrains.ReSharper.Psi.ExtensionsAPI.Tree;
-
-    [ContextAction(Description = "Remove Type Qualifier", Group = "C#", Name = "RemoveTypeQualifier", Priority = 1)]
-    public class RemoveTypeQualifierContextAction : ContextActionBase
+    [ContextAction(Description = "Remove type qualifier", Group = "C#", Name = "RemoveTypeQualifier", Priority = 1)]
+    public class RemoveTypeQualifierAction : ContextActionBase
     {
         private readonly ICSharpContextActionDataProvider provider;
-        private string ACTION_NAME = "Remove Type Qualifier";
+        private string ACTION_NAME = "Remove type qualifier";
 
-        public RemoveTypeQualifierContextAction(ICSharpContextActionDataProvider provider)
+        public RemoveTypeQualifierAction(ICSharpContextActionDataProvider provider)
         {
             this.provider = provider;
         }
@@ -36,7 +34,9 @@ namespace RefactorPlus
         {
             var typeUsage = this.provider.GetSelectedElement<IUserDeclaredTypeUsage>(true, true);
 
-            return typeUsage != null;
+            return typeUsage != null
+                && typeUsage.TypeName != null
+                && typeUsage.TypeName.Qualifier != null;
         }
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
@@ -62,7 +62,9 @@ namespace RefactorPlus
 
             string qualifyingNamespace = typeQualifier.QualifiedName;
 
-            // handles the case of RegularExpressions in the following source:
+            // Resolving the qualifier is required to handle the 
+            // case of RegularExpressions in the following source:
+            //
             // namespace System.Text { 
             //   public class Class1 { 
             //     public void Method1 { 
@@ -74,10 +76,7 @@ namespace RefactorPlus
             if (resolvedNamespace != null)
                 qualifyingNamespace = resolvedNamespace.QualifiedName;
 
-            var file = this.provider.GetSelectedElement<ICSharpFile>(true, true);
-            if (file == null)
-                return;
-
+            var file = this.provider.PsiFile;
             var usingDirective = EnsureUsingExists(qualifyingNamespace, file);
 
             if (usingDirective == null)
@@ -95,10 +94,9 @@ namespace RefactorPlus
                 newQualifier =
                     this.provider.ElementFactory.CreateReferenceName(aliasName);
             }
+
             var visitor = new ReplaceAllTypeQualifiersVisitor(usingDirective, newQualifier);
             file.Accept(visitor);
-
-            // TODO: generate local variale for control.Selection.SetRange(textRange);
         }
 
         private INamespace AttemptToResolve(IReferenceName typeQualifier)
@@ -120,12 +118,11 @@ namespace RefactorPlus
                     this.provider.ElementFactory.CreateReferenceName(aliasName);
 
                 typeQualifier.ReplaceBy(newQualifier);
-
-                //IReferenceExpression x = ModificationUtil.ReplaceChild(typeQualifier, newQualifier);
             }
             else
             {
-                ModificationUtil.DeleteChildRange(typeQualifier, typeQualifier.NextSibling);
+                if (typeQualifier != null) 
+                    ModificationUtil.DeleteChildRange(typeQualifier, typeQualifier.NextSibling);
             }
         }
 
@@ -153,11 +150,7 @@ namespace RefactorPlus
 
             var newUsing = this.provider.ElementFactory.CreateUsingDirective(qualifyingNamespace);
 
-            var import = ModificationUtil.AddChildAfter(anchor, newUsing);
-
-            //var import = toFile.AddImportAfter(newUsing, anchor);
-
-            return import;
+            return ModificationUtil.AddChildAfter(anchor, newUsing);
         }
     }
 
@@ -183,34 +176,6 @@ namespace RefactorPlus
                 Replace(existingReference, replacingReference);
         }
 
-        /*
-        public bool InteriorShouldBeProcessed(ITreeNode element)
-        {
-            if (element is IUsingList
-                || element is IUsingDirective)
-                return false;
-
-            var existingReference = element as IReferenceName;
-            if (existingReference == null)
-                return true;
-
-
-            return false;
-        }
-
-         */
-        private void Replace(IReferenceName existingReference, IReferenceName referenceName)
-        {
-            if (referenceName != null)
-            {
-                existingReference.ReplaceBy(this.replacingReference);
-            }
-            else
-            {
-                ModificationUtil.DeleteChildRange(existingReference, existingReference.NextSibling);
-            }
-        }
-
         private bool IsMatch(IReferenceName existingReference, IUsingDirective usingDirective)
         {
             var result = existingReference.Reference.Resolve();
@@ -227,6 +192,18 @@ namespace RefactorPlus
             }
 
             return false;
+        }
+
+        private void Replace(IReferenceName existingReference, IReferenceName referenceName)
+        {
+            if (referenceName != null)
+            {
+                existingReference.ReplaceBy(this.replacingReference);
+            }
+            else
+            {
+                ModificationUtil.DeleteChildRange(existingReference, existingReference.NextSibling);
+            }
         }
     }
 
