@@ -85,8 +85,14 @@ namespace RefactorPlus
             var visitor = new ReplaceAllTypeQualifiersVisitor(usingDirective, newQualifier);
             file.Accept(visitor);
 
-            DocOffsetAndVirtual cursorOffset = new DocOffsetAndVirtual(newQualifier.GetDocumentStartOffset().TextRange.StartOffset);
-            return tc => tc.Caret.MoveTo(cursorOffset, CaretVisualPlacement.Generic);
+            if (newQualifier != null)
+            {
+                var docStartOffset = newQualifier.GetDocumentStartOffset();
+                DocOffsetAndVirtual cursorOffset = new DocOffsetAndVirtual(docStartOffset.TextRange.StartOffset);
+                return tc => tc.Caret.MoveTo(cursorOffset, CaretVisualPlacement.Generic);
+            }
+
+            return null;
         }
 
         private INamespace AttemptToResolve(IReferenceName typeQualifier)
