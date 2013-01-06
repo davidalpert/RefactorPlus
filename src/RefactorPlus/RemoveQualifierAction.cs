@@ -41,24 +41,22 @@ namespace RefactorPlus
 
         protected override Action<ITextControl> ExecutePsiTransaction(ISolution solution, IProgressIndicator progress)
         {
-            RemoveTypeQualifier();
-
-            return null;
+            return RemoveTypeQualifier();
         }
 
-        private void RemoveTypeQualifier()
+        private Action<ITextControl> RemoveTypeQualifier()
         {
             var typeUsage = this.provider.GetSelectedElement<IUserDeclaredTypeUsage>(true, true);
             if (typeUsage == null)
-                return;
+                return null;
 
             var referenceName = typeUsage.FirstChild as IReferenceName;
             if (referenceName == null)
-                return;
+                return null;
 
             var typeQualifier = referenceName.Qualifier;
             if (typeQualifier == null)
-                return;
+                return null;
 
             string qualifyingNamespace = typeQualifier.QualifiedName;
 
@@ -80,23 +78,15 @@ namespace RefactorPlus
             var usingDirective = EnsureUsingExists(qualifyingNamespace, file);
 
             if (usingDirective == null)
-                return;
+                return null;
 
-            ReQualify(typeQualifier, usingDirective);
-
-            IReferenceName newQualifier = null;
-            if (usingDirective is IUsingAliasDirective)
-            {
-                var usingAliasDirective = usingDirective as IUsingAliasDirective;
-
-                var aliasName = usingAliasDirective.AliasName;
-
-                newQualifier =
-                    this.provider.ElementFactory.CreateReferenceName(aliasName);
-            }
+            var newQualifier = ReQualify(typeQualifier, usingDirective);
 
             var visitor = new ReplaceAllTypeQualifiersVisitor(usingDirective, newQualifier);
             file.Accept(visitor);
+
+            DocOffsetAndVirtual cursorOffset = new DocOffsetAndVirtual(newQualifier.GetDocumentStartOffset().TextRange.StartOffset);
+            return tc => tc.Caret.MoveTo(cursorOffset, CaretVisualPlacement.Generic);
         }
 
         private INamespace AttemptToResolve(IReferenceName typeQualifier)
@@ -106,7 +96,7 @@ namespace RefactorPlus
             return resolvedNamespace;
         }
 
-        private void ReQualify(IReferenceName typeQualifier, IUsingDirective usingDirective)
+        private IReferenceName ReQualify(IReferenceName typeQualifier, IUsingDirective usingDirective)
         {
             if (usingDirective is IUsingAliasDirective)
             {
@@ -117,14 +107,13 @@ namespace RefactorPlus
                 IReferenceName newQualifier =
                     this.provider.ElementFactory.CreateReferenceName(aliasName);
 
-                typeQualifier = typeQualifier.ReplaceBy(newQualifier);
+                return typeQualifier.ReplaceBy(newQualifier);
+            }
 
-            }
-            else
-            {
-                if (typeQualifier != null) 
-                    ModificationUtil.DeleteChildRange(typeQualifier, typeQualifier.NextSibling);
-            }
+            if (typeQualifier != null) 
+                ModificationUtil.DeleteChildRange(typeQualifier, typeQualifier.NextSibling);
+
+            return null;
         }
 
         private IUsingDirective EnsureUsingExists(string qualifyingNamespace, ICSharpFile file)
@@ -197,6 +186,7 @@ namespace RefactorPlus
 
         private void Replace(IReferenceName existingReference, IReferenceName referenceName)
         {
+            // TODO: confirm that cursor fix works here too.
             if (referenceName != null)
             {
                 existingReference.ReplaceBy(this.replacingReference);

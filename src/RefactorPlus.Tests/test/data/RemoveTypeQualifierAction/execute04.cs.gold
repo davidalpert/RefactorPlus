@@ -1,0 +1,12 @@
+using System.Text.RegularExpressions;
+
+namespace System.Text
+{
+  class C
+  {
+    static void Main(string[] args)
+    {
+      var z = new {caret}Regex("a");
+    }
+  }
+}
