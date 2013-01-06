@@ -117,7 +117,8 @@ namespace RefactorPlus
                 IReferenceName newQualifier =
                     this.provider.ElementFactory.CreateReferenceName(aliasName);
 
-                typeQualifier.ReplaceBy(newQualifier);
+                typeQualifier = typeQualifier.ReplaceBy(newQualifier);
+
             }
             else
             {
@@ -144,11 +145,11 @@ namespace RefactorPlus
             if (usingList == null)
                 return null;
 
+            var newUsing = this.provider.ElementFactory.CreateUsingDirective(qualifyingNamespace);
+
             IUsingDirective anchor = usingList.LastChild as IUsingDirective;
             if (anchor == null)
-                return null;
-
-            var newUsing = this.provider.ElementFactory.CreateUsingDirective(qualifyingNamespace);
+                return ModificationUtil.AddChild(usingList, newUsing);
 
             return ModificationUtil.AddChildAfter(anchor, newUsing);
         }
