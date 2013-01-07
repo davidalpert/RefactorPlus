@@ -85,14 +85,15 @@ namespace RefactorPlus
             var visitor = new ReplaceAllTypeQualifiersVisitor(usingDirective, newQualifier);
             file.Accept(visitor);
 
+            var caretTarget = typeQualifier.GetDocumentStartOffset();
+
             if (newQualifier != null)
             {
-                var docStartOffset = newQualifier.GetDocumentStartOffset();
-                DocOffsetAndVirtual cursorOffset = new DocOffsetAndVirtual(docStartOffset.TextRange.StartOffset);
-                return tc => tc.Caret.MoveTo(cursorOffset, CaretVisualPlacement.Generic);
+                caretTarget = newQualifier.GetDocumentStartOffset();
             }
 
-            return null;
+            DocOffsetAndVirtual cursorOffset = new DocOffsetAndVirtual(caretTarget.TextRange.StartOffset);
+            return tc => tc.Caret.MoveTo(cursorOffset, CaretVisualPlacement.Generic);
         }
 
         private INamespace AttemptToResolve(IReferenceName typeQualifier)
@@ -166,10 +167,11 @@ namespace RefactorPlus
             // ignore
         }
 
-        public override void VisitReferenceName(IReferenceName existingReference)
+        public override void VisitUserDeclaredTypeUsage(IUserDeclaredTypeUsage userDeclaredTypeUsageParam)
         {
-            if (IsMatch(existingReference, usingDirective))
-                Replace(existingReference, replacingReference);
+            var typeQualifier = userDeclaredTypeUsageParam.TypeName.Qualifier;
+            if (IsMatch(typeQualifier, usingDirective))
+                Replace(typeQualifier, replacingReference);
         }
 
         private bool IsMatch(IReferenceName existingReference, IUsingDirective usingDirective)

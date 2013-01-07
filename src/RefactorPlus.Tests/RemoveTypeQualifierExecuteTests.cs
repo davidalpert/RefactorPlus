@@ -30,6 +30,8 @@ namespace RefactorPlus.Tests
         [TestCase("execute01")]
         [TestCase("execute02")]
         [TestCase("execute03")]
+        [TestCase("execute04")]
+        [TestCase("execute05")]
         [Test]
         public void TestCases(string testSrc)
         {
