@@ -85,7 +85,7 @@ namespace RefactorPlus
             var visitor = new ReplaceAllTypeQualifiersVisitor(usingDirective, newQualifier);
             file.Accept(visitor);
 
-            var caretTarget = typeQualifier.GetDocumentStartOffset();
+            var caretTarget = typeUsage.GetDocumentStartOffset();
 
             if (newQualifier != null)
             {
@@ -169,9 +169,16 @@ namespace RefactorPlus
 
         public override void VisitUserDeclaredTypeUsage(IUserDeclaredTypeUsage userDeclaredTypeUsageParam)
         {
+            return;
             var typeQualifier = userDeclaredTypeUsageParam.TypeName.Qualifier;
             if (IsMatch(typeQualifier, usingDirective))
                 Replace(typeQualifier, replacingReference);
+        }
+
+        public override void VisitReferenceName(IReferenceName existingReference)
+        {
+            if (IsMatch(existingReference, usingDirective))
+                Replace(existingReference, replacingReference);
         }
 
         private bool IsMatch(IReferenceName existingReference, IUsingDirective usingDirective)
