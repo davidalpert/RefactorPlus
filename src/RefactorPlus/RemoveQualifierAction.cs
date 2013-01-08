@@ -167,9 +167,16 @@ namespace RefactorPlus
             // ignore
         }
 
+        public override void VisitNode(ITreeNode node)
+        {
+            foreach (var child in node.Children().Cast<ICSharpTreeNode>())
+            {
+                child.Accept(this);
+            }
+        }
+
         public override void VisitUserDeclaredTypeUsage(IUserDeclaredTypeUsage userDeclaredTypeUsageParam)
         {
-            return;
             var typeQualifier = userDeclaredTypeUsageParam.TypeName.Qualifier;
             if (IsMatch(typeQualifier, usingDirective))
                 Replace(typeQualifier, replacingReference);
@@ -183,6 +190,9 @@ namespace RefactorPlus
 
         private bool IsMatch(IReferenceName existingReference, IUsingDirective usingDirective)
         {
+            if (existingReference == null)
+                return false;
+
             var result = existingReference.Reference.Resolve();
             if (result.IsValid())
             {
