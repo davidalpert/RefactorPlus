@@ -167,12 +167,29 @@ namespace RefactorPlus
             // ignore
         }
 
+        public override void VisitNode(ITreeNode node)
+        {
+            foreach (var child in node.Children().Cast<ICSharpTreeNode>())
+            {
+                child.Accept(this);
+            }
+        }
+
+        public override void VisitReferenceExpression(IReferenceExpression referenceExpressionParam)
+        {
+            base.VisitReferenceExpression(referenceExpressionParam);
+        }
+
         public override void VisitUserDeclaredTypeUsage(IUserDeclaredTypeUsage userDeclaredTypeUsageParam)
         {
-            return;
             var typeQualifier = userDeclaredTypeUsageParam.TypeName.Qualifier;
             if (IsMatch(typeQualifier, usingDirective))
                 Replace(typeQualifier, replacingReference);
+        }
+
+        public override void VisitUserTypeUsage(IUserTypeUsage userTypeUsageParam)
+        {
+            base.VisitUserTypeUsage(userTypeUsageParam);
         }
 
         public override void VisitReferenceName(IReferenceName existingReference)
